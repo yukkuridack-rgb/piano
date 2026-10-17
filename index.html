@@ -117,6 +117,15 @@ summary{font-weight:500;font-size:14px}
 <main>
 <h1>コード進行ピアノ</h1>
 <p class="lead">コードを並べて再生を押すと、ピアノで弾いてくれます。</p>
+<section class="panel" id="scp" hidden>
+  <label class="t">楽譜 (プロモード) — 五線をクリックで音符を追加 / 音符をクリックで削除 / 小節の「4/4」表示をクリックでその小節の拍数を変更</label>
+  <div class="row" style="margin-bottom:8px">
+    <label>音符 <select id="dur" style="width:auto"><option value="1">全音符</option><option value="2">2分</option><option value="4" selected>4分</option><option value="8">8分</option><option value="16">16分</option></select></label>
+    <label>臨時記号 <select id="acc" style="width:auto"><option value="0">なし</option><option value="1">♯</option><option value="2">♭</option></select></label>
+    <button id="bpl">＋小節</button><button id="bmi">－小節</button><button id="bch">コード→小節</button><button id="bcd">小節→コード長</button><button id="mclr">メロディ消去</button>
+  </div>
+  <div style="overflow-x:auto"><canvas id="sc" height="170" style="display:block;cursor:crosshair"></canvas></div>
+</section>
 <div class="piano"><div class="now"><span id="now">—</span><small>いま弾いているコード</small></div><div class="kb" id="kb"></div></div>
 
 <section class="panel">
@@ -149,7 +158,7 @@ summary{font-weight:500;font-size:14px}
 <section class="panel">
   <label class="t">保存・読み込み・書き出し</label>
   <div class="row">
-    <button id="sv">💾 txtで保存</button><button id="ltx">📂 txtを読み込む</button><button id="lmd">🎼 MIDIを読み込む</button>
+    <button id="sv">💾 txtで保存</button><button id="ltx">📂 txtを読み込む</button><button id="lmd">🎼 MIDIを読み込む</button><button id="pro">🔒 プロモード</button><span id="pwr" hidden><input id="pw" type="password" placeholder="パスワード" style="font:inherit;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);width:130px"> <button id="pwo">OK</button></span>
     <input type="file" id="ftx" accept=".txt,text/plain" hidden><input type="file" id="fmd" accept=".mid,.midi,audio/midi" hidden>
     <span id="fst" style="color:var(--mute);font-size:14px"></span>
   </div>
@@ -162,8 +171,14 @@ summary{font-weight:500;font-size:14px}
 
 <section class="panel">
   <div class="grid">
-    <div class="ctl"><label for="bpm">テンポ (BPM)<output></output></label><input id="bpm" type="range" min="40" max="220" value="96"></div>
-    <div class="ctl"><label for="beats">1コードの拍数<output></output></label><input id="beats" type="range" min="1" max="8" value="4"></div>
+    <div class="ctl"><label for="bpm">テンポ (♩=BPM)<output></output></label><input id="bpm" type="range" min="40" max="220" value="96"></div>
+    <div class="ctl"><label for="tsn">拍子</label>
+      <div style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;margin-top:4px">
+        <input id="tsn" type="number" class="num" min="1" max="16" value="4" style="width:60px;text-align:center;font-size:22px">
+        <span style="width:60px;border-top:2px solid var(--ink)"></span>
+        <select id="tsd" style="width:60px;text-align:center;font-size:22px"><option>2</option><option selected>4</option><option>8</option><option>16</option></select>
+      </div></div>
+    <div class="ctl"><label for="beats">1コードの拍数<output></output></label><input id="beats" type="range" min="1" max="16" value="4"></div>
     <div class="ctl"><label for="gate">音の長さ (切れ具合)<output></output></label><input id="gate" type="range" min="10" max="100" value="90"></div>
     <div class="ctl"><label for="sus">音の伸び (余韻)<output></output></label><input id="sus" type="range" min="0.3" max="8" step="0.1" value="3"></div>
     <div class="ctl"><label for="vol">音量<output></output></label><input id="vol" type="range" min="0" max="100" value="70"></div>
@@ -221,6 +236,8 @@ summary{font-weight:500;font-size:14px}
 <li>コードのチップをクリックすると、上の書き方をマス目で編集できます。</li>
 <li>「txtで保存」でコードと設定をテキストに保存、「txtを読み込む」で復元できます(コードだけのtxtもOK)。「MIDIを読み込む」はMIDIの音からコードを推定して書き起こします(ドラムは無視。ファイルのドロップでも読み込めます)。</li>
 <li>MP3/MP4は書き出し用に音を作り直すので、再生中と少し違う揺らぎになります。MP4は曲の長さぶん実時間で収録します。読み上げは音声に入りません。</li>
+<li>拍子は 分子(上)/分母(下) で指定します。分母が1拍の長さで、6/8 なら8分音符が1拍。拍子を変えると「1コードの拍数」が1小節ぶん(分子)になります。BPM は4分音符の速さです。</li>
+<li>プロモード: 「🔒 プロモード」を押してパスワードを入れると、ピアノの上に五線譜が出ます。五線をクリックで音符追加(音符の種類・♯♭は上のメニュー)、音符クリックで削除、小節の「4/4」表示クリックでその小節だけ拍数を変更。メロディはコードと一緒に再生され、MP3/MP4やtxt保存にも入ります。</li>
 <li>スライダーはドラッグ、右の数字欄への入力、クリック後のマウスホイールで変えられます。</li>
 <li>テンポなどの変更は、次のループか次の再生から反映されます。</li>
 </ul>
@@ -283,7 +300,7 @@ function parsePat(p){
   return{div,steps:p.split(',').map(x=>x.trim()).map(x=>(x===''||x==='.'||x==='_')?[]:x.split('+').map(q=>{const k=q.match(/^(b|B|\d+)([!?]?)(~*)$/);return k?{b:/b/i.test(k[1]),n:+k[1]||0,v:k[2],ties:k[3].length}:null}).filter(c=>c&&(c.b||c.n>0)))};
 }
 function patPlay(it,t,dur,notes,bass,ev,spb,s){
-  const P=parsePat(it.pat),step=spb*4/P.div,N=Math.round(dur/step+1e-6),L=notes.length;
+  const P=parsePat(it.pat),step=spb*s.tsd/P.div,N=Math.round(dur/step+1e-6),L=notes.length;
   for(let j=0;j<N;j++)P.steps[j%P.steps.length].forEach(c=>{
     const m=c.b?bass:notes[(c.n-1)%L]+12*Math.floor((c.n-1)/L);
     if(m==null||isNaN(m))return;
@@ -310,7 +327,7 @@ function ser(st,div,T){
 function cur(){
   const it=parse($('#src').value)[sel];if(!it||it.type!=='chord')return null;
   const div=+$('#ediv').value,beats=it.beats||+$('#beats').value;
-  return{it,div,T:it.iv.length,N:Math.max(1,Math.round(beats*div/4))};
+  return{it,div,T:it.iv.length,N:Math.max(1,Math.round(beats*div/+$('#tsd').value))};
 }
 function write(c,st,sty){
   const t=c.it.tok+(st?'['+ser(st,c.div,c.T)+']':'')+(sty?'@'+sty:'');
@@ -335,7 +352,7 @@ function ed(){
   $('#edsty').value=it.sty||'';
   const st=it.pat?fromPat(it.pat,T,N):Array.from({length:T+1},()=>Array(N).fill(0));
   const g=$('#edgrid');g.textContent='';g.style.gridTemplateColumns='76px repeat('+N+',28px)';
-  const per=div/4;
+  const per=Math.max(1,div/+$('#tsd').value);
   for(let r=0;r<=T;r++){
     const lab=document.createElement('span');lab.className='rl';
     lab.textContent=r===T?'低音 '+NN[((bass%12)+12)%12]:NN[notes[T-1-r]%12];g.appendChild(lab);
@@ -485,11 +502,11 @@ function voiceOld(m,t,hold,vel,S,pedal,dest){
     o.connect(g);g.connect(lp);o.start(t);o.stop(end);});
   lp.connect(env);env.connect(gate);gate.connect(dest);
 }
-function settings(){return{bpm:+$('#bpm').value,beats:+$('#beats').value,gate:$('#gate').value/100,S:+$('#sus').value,vol:$('#vol').value/100,oct:+$('#oct').value,tr:+$('#tr').value,style:$('#style').value,rate:+$('#rate').value,voice:$('#voice').value,bass:$('#bass').checked,pedal:$('#pedal').checked}}
+function settings(){return{bpm:+$('#bpm').value,beats:+$('#beats').value,tsn:+$('#tsn').value,tsd:+$('#tsd').value,gate:$('#gate').value/100,S:+$('#sus').value,vol:$('#vol').value/100,oct:+$('#oct').value,tr:+$('#tr').value,style:$('#style').value,rate:+$('#rate').value,voice:$('#voice').value,bass:$('#bass').checked,pedal:$('#pedal').checked}}
 
 function run(t0,items,s){
   const dest=ctx.createGain();dest.gain.value=s.vol;dest.connect(comp);masters.push(dest);
-  const spb=60/s.bpm,base=12*(s.oct+1);
+  const spb=60/s.bpm*4/s.tsd,base=12*(s.oct+1);
   const adj=p=>{p=((p+s.tr)%12+12)%12;return p>=7?p-12:p};
   let t=t0;const chips=[...document.querySelectorAll('.chip')];
   items.forEach((it,i)=>{
@@ -523,7 +540,8 @@ function run(t0,items,s){
     }
     t+=dur;
   });
-  return t;
+  melPlay(t0,s,dest);
+  return Math.max(t,t0+melEnd()*60/s.bpm);
 }
 
 function start(){
@@ -545,7 +563,7 @@ function start(){
   cycle();
 }
 function stop(){
-  playing=false;timers.forEach(clearTimeout);timers=[];
+  playing=false;MEL.forEach(n=>n.on=0);timers.forEach(clearTimeout);timers=[];
   masters.forEach(m=>{try{m.disconnect()}catch(e){}});masters=[];if('speechSynthesis' in window)speechSynthesis.cancel();
   Object.keys(cnt).forEach(m=>{cnt[m]=0;keys[m]&&keys[m].classList.remove('lit')});
   document.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));$('#now').textContent='—';
@@ -610,7 +628,7 @@ function hints(){
 document.addEventListener('keydown',e=>{
   if(!$('#pck').checked||e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;
   const t=e.target,tg=t.tagName;
-  if(tg==='TEXTAREA'||tg==='SELECT'||(tg==='INPUT'&&['text','number'].includes(t.type)))return;
+  if(tg==='TEXTAREA'||tg==='SELECT'||(tg==='INPUT'&&['text','number','password'].includes(t.type)))return;
   const m=kmap()[e.code];if(m===undefined)return;
   e.preventDefault();
   press('k'+e.code,m,{clientY:kb.getBoundingClientRect().top+kb.offsetHeight*.55});
@@ -638,18 +656,18 @@ $('#edsty').onchange=()=>{const c=cur();if(!c)return;write(c,c.it.pat?fromPat(c.
 $('#edx').onclick=()=>{sel=-1;draw()};
 $('#play').onclick=()=>playing?stop():start();
 /* ---- 保存・読込・書き出し ---- */
-const KEYS=['bpm','beats','gate','sus','vol','rev','br','ham','oct','tr','rate','style','bass','pedal','loop'],HEAD='#コード進行ピアノ v1';
+const KEYS=['bpm','tsn','tsd','beats','gate','sus','vol','rev','br','ham','oct','tr','rate','style','bass','pedal','loop'],HEAD='#コード進行ピアノ v1';
 const fst=m=>$('#fst').textContent=m,exs=m=>$('#exst').textContent=m;
 function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),9e3)}
 function setV(id,v){const e=$('#'+id);if(!e)return;if(e.type==='checkbox')e.checked=v==='1'||v===true;else if(e.type==='range'){const n=Math.min(+e.max,Math.max(+e.min,+v));if(isNaN(n))return;e.value=n;e.dispatchEvent(new Event('input'))}else e.value=v}
 $('#sv').onclick=()=>{
-  const l=[HEAD,...KEYS.map(k=>{const e=$('#'+k);return k+'='+(e.type==='checkbox'?+e.checked:e.value)}),'---',$('#src').value];
+  const l=[HEAD,...KEYS.map(k=>{const e=$('#'+k);return k+'='+(e.type==='checkbox'?+e.checked:e.value)}),...(MEL.length?['mel='+MEL.map(n=>[n.m,n.s,n.l,n.f?1:0].join(':')).join(','),'bars='+BARS.join(',')]:[]),'---',$('#src').value];
   dl(new Blob([l.join('\n')],{type:'text/plain;charset=utf-8'}),'コード進行.txt');fst('保存しました');
 };
 function loadTxt(t){
   t=t.replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n');let code=t;
-  if(t.startsWith('#コード進行ピアノ')){const i=t.indexOf('\n---\n');if(i>=0){t.slice(0,i).split('\n').forEach(l=>{const m=l.match(/^(\w+)=(.*)$/);if(m&&KEYS.includes(m[1]))setV(m[1],m[2].trim())});code=t.slice(i+5)}}
-  $('#src').value=code.replace(/\n+$/,'');sel=-1;draw();fst('テキストを読み込みました');
+  if(t.startsWith('#コード進行ピアノ')){const i=t.indexOf('\n---\n');if(i>=0){MEL=[];BARS=[4,4,4,4];t.slice(0,i).split('\n').forEach(l=>{const m=l.match(/^(\w+)=(.*)$/);if(!m)return;if(KEYS.includes(m[1]))setV(m[1],m[2].trim());else if(m[1]==='mel')MEL=m[2].split(',').filter(Boolean).map(x=>{const a=x.split(':').map(Number);return{m:a[0],s:a[1],l:a[2],f:!!a[3]}});else if(m[1]==='bars')BARS=m[2].split(',').map(Number).filter(n=>n>0)});if(!BARS.length)BARS=[4];code=t.slice(i+5)}}
+  $('#src').value=code.replace(/\n+$/,'');sel=-1;draw();score();fst('テキストを読み込みました');
 }
 /* MIDI → コード進行 */
 function readMidi(b){
@@ -677,7 +695,8 @@ function readMidi(b){
     Object.keys(op).forEach(key=>op[key].forEach(o=>notes.push({s:o[0]/dv,e:tk/dv+.01,p:key%128,v:o[1]})));
   }
   tem.sort((a,b)=>a[0]-b[0]);ts.sort((a,b)=>a[0]-b[0]);
-  return{notes,bpm:tem.length?Math.round(6e7/tem[0][1]):120,bar:ts.length?ts[0][1]*4/ts[0][2]:4};
+  const tn=ts.length?ts[0][1]:4,td=ts.length&&[2,4,8,16].includes(ts[0][2])?ts[0][2]:4;
+  return{notes,bpm:tem.length?Math.round(6e7/tem[0][1]):120,bar:tn*4/td,tn,td};
 }
 const CQ=[['',[0,4,7],0],['m',[0,3,7],0],['7',[0,4,7,10],.1],['maj7',[0,4,7,11],.1],['m7',[0,3,7,10],.1],['m7b5',[0,3,6,10],.14],['dim',[0,3,6],.1],['aug',[0,4,8],.15],['sus4',[0,5,7],.12]],RN=['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
 function midiToCode(m){
@@ -702,13 +721,14 @@ function midiToCode(m){
   if(!seg.length)throw new Error('コードを検出できませんでした');
   const cnt={};seg.forEach(g=>{if(g.n<=8)cnt[g.n]=(cnt[g.n]||0)+g.n});
   const bt=+Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0]||4;
-  const tok=seg.map(g=>(g.s===ns?'_':RN[S[g.s].r]+S[g.s].q)+(g.n===bt?'':':'+g.n));
-  return{text:tok.map((t,i)=>t+((i+1)%8===0?'\n':' ')).join('').trim(),bt,n:seg.length,cut:m.notes.some(n=>n.e>1600)};
+  const f=m.td/4,bB=Math.max(1,Math.round(bt*f));
+  const tok=seg.map(g=>(g.s===ns?'_':RN[S[g.s].r]+S[g.s].q)+(Math.abs(g.n*f-bB)<1e-6?'':':'+(+(g.n*f).toFixed(2))));
+  return{text:tok.map((t,i)=>t+((i+1)%8===0?'\n':' ')).join('').trim(),bt:bB,n:seg.length,cut:m.notes.some(n=>n.e>1600)};
 }
 function loadMidi(b,name){
   const m=readMidi(b);if(!m.notes.length)throw new Error('音符がありません');
-  const r=midiToCode(m);$('#src').value=r.text;setV('bpm',m.bpm);setV('beats',r.bt);sel=-1;draw();
-  fst(name+' から '+r.n+' 個のコードを読み取りました (BPM '+m.bpm+')'+(r.cut?' ※長いので途中まで':''));
+  const r=midiToCode(m);$('#src').value=r.text;setV('bpm',m.bpm);setV('tsn',m.tn);setV('tsd',m.td);setV('beats',r.bt);sel=-1;draw();
+  fst(name+' から '+r.n+' 個のコードを読み取りました (BPM '+m.bpm+', '+m.tn+'/'+m.td+'拍子)'+(r.cut?' ※長いので途中まで':''));
 }
 async function onFile(f){
   if(!f)return;const b=await f.arrayBuffer();
@@ -723,7 +743,8 @@ async function prep(){
   const items=parse($('#src').value);
   if(!items.length||items.some(i=>!i.ok)){exs('読み取れないコードがあります');return null}
   stop();const s=settings(),reps=+$('#reps').value;let d=0;
-  items.forEach(it=>d+=it.type==='say'?est(it.text,s.rate):(it.beats||s.beats)*60/s.bpm);
+  items.forEach(it=>d+=it.type==='say'?est(it.text,s.rate):(it.beats||s.beats)*60/s.bpm*4/s.tsd);
+  d=Math.max(d,melEnd()*60/s.bpm);
   if(d*reps>600){exs('長すぎます (10分まで)');return null}
   const sr=44100,tail=3+(s.pedal?Math.min(s.S*1.5,10):0),sv={ctx,comp,wet,live,masters},rec={keys:[],labels:[]};
   const off=new OfflineAudioContext(2,Math.ceil((.1+d*reps+tail)*sr),sr);
@@ -785,6 +806,74 @@ $('#mp4').onclick=()=>busy(async()=>{
   dl(new Blob(ch,{type:mime.split(';')[0]}),'コード進行.'+(mp4?'mp4':'webm'));
   exs((mp4?'MP4':'このブラウザはMP4に未対応のためWebM')+'で保存しました'+(r.say?' (読み上げ部分は無音になります)':''));
 });
+
+['#tsn','#tsd'].forEach(i=>$(i).onchange=()=>{const n=Math.min(16,Math.max(1,Math.round(+$('#tsn').value)||4));$('#tsn').value=n;setV('beats',n)});
+/* ---- プロモード (楽譜) ---- */
+const PRO_PW='piano'; /* ← パスワードはここを書き換え */
+let PRO=false,MEL=[],BARS=[4,4,4,4];
+const LM=56,PQ=64,CH=170,NAT=[0,2,4,5,7,9,11],BK=[1,3,6,8,10],tsdv=()=>+$('#tsd').value,bq=n=>n*4/tsdv(),yOf=s=>85-(s-6)*4;
+const stepOf=(m,f)=>{const p=m%12;return(Math.floor(m/12)-5)*7+[0,0,1,1,2,3,3,4,4,5,5,6][p]+(f&&BK.includes(p)?1:0)};
+const melEnd=()=>PRO?MEL.reduce((a,n)=>Math.max(a,n.s+n.l),0):0;
+function bounds(){let a=0;return BARS.map(n=>{const o={a,q:bq(n),n};a+=o.q;return o})}
+function melPlay(t0,s,dest){
+  if(!PRO)return;const q=60/s.bpm;
+  MEL.forEach(n=>{
+    const m=n.m+s.tr,at=t0+n.s*q,h=Math.max(.08,n.l*q*.95);
+    voice(m,at,h,.65,s.S,s.pedal,dest);
+    if(OFF){REC.keys.push({m,a:at,b:at+h+.05});return}
+    const ui=(fn,x)=>timers.push(setTimeout(fn,Math.max(0,(x-ctx.currentTime)*1000)));
+    ui(()=>{lit(m,true);n.on=1;score()},at);ui(()=>{lit(m,false);n.on=0;score()},at+h+.05);
+  });
+}
+function score(){
+  if(!PRO)return;
+  const c=$('#sc'),B=bounds(),tot=B.reduce((a,b)=>a+b.q,0),u=4/tsdv();c.width=LM+tot*PQ+24;c.height=CH;
+  const g=c.getContext('2d'),cs=getComputedStyle(document.documentElement),ink=cs.getPropertyValue('--ink').trim(),mu=cs.getPropertyValue('--mute').trim(),ac=cs.getPropertyValue('--acc').trim();
+  const vl=(x)=>{g.beginPath();g.moveTo(x,yOf(10));g.lineTo(x,yOf(2));g.stroke()};
+  g.strokeStyle=ink;g.fillStyle=ink;g.lineWidth=1;
+  [2,4,6,8,10].forEach(s=>{g.beginPath();g.moveTo(LM-10,yOf(s));g.lineTo(c.width-10,yOf(s));g.stroke()});
+  g.font='46px serif';g.fillText('𝄞',6,yOf(2)+4);g.font='12px sans-serif';
+  B.forEach(b=>{const x=LM+b.a*PQ;g.strokeStyle=mu;g.globalAlpha=.35;for(let k=u;k<b.q-1e-6;k+=u)vl(LM+(b.a+k)*PQ);g.globalAlpha=1;g.strokeStyle=ink;vl(x);g.fillStyle=ac;g.fillText(b.n+'/'+tsdv(),x+4,16)});
+  g.strokeStyle=ink;vl(LM+tot*PQ);
+  let pos=0;g.fillStyle=mu;
+  parse($('#src').value).forEach(it=>{if(it.ok&&it.type!=='say')g.fillText(it.tok.replace(/:.*/,''),LM+pos*PQ+4,CH-6);if(it.type!=='say')pos+=(it.beats||+$('#beats').value)*u});
+  MEL.forEach(n=>{
+    const st=stepOf(n.m,n.f),x=LM+n.s*PQ+8,y=yOf(st),col=n.on?ac:ink;g.strokeStyle=g.fillStyle=col;g.lineWidth=1;
+    const lg=k=>{g.beginPath();g.moveTo(x-11,yOf(k));g.lineTo(x+11,yOf(k));g.stroke()};
+    if(st<2)for(let k=0;k>=st;k-=2)lg(k);if(st>10)for(let k=12;k<=st;k+=2)lg(k);
+    g.globalAlpha=.4;g.lineWidth=3;g.beginPath();g.moveTo(x,y);g.lineTo(x+n.l*PQ-8,y);g.stroke();g.globalAlpha=1;g.lineWidth=1.5;
+    g.beginPath();g.ellipse(x,y,6,4.2,-.35,0,7);n.l>=2?g.stroke():g.fill();
+    if(n.l<4){const up=st<6,sx=up?x+5.5:x-5.5,ey=up?y-28:y+28;g.beginPath();g.moveTo(sx,y);g.lineTo(sx,ey);g.stroke();
+      for(let f=0;f<(n.l<=.25?2:n.l<=.5?1:0);f++){const fy=ey+(up?1:-1)*f*5;g.beginPath();g.moveTo(sx,fy);g.lineTo(sx+8,fy+(up?9:-9));g.stroke()}}
+    if(BK.includes(n.m%12)){g.font='16px serif';g.fillText(n.f?'♭':'♯',x-19,y+5);g.font='12px sans-serif'}
+  });
+}
+$('#sc').onclick=e=>{
+  const r=e.target.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,B=bounds(),t=(x-LM)/PQ;
+  if(y<24){const i=B.findIndex(b=>t>=b.a&&t<b.a+b.q);if(i>=0){const v=parseFloat(prompt('この小節の拍数',B[i].n));if(v>0&&v<=32){BARS[i]=v;score()}}return}
+  if(t<0||t>=B.reduce((a,b)=>a+b.q,0))return;
+  const st=Math.max(-9,Math.min(21,Math.round(6+(85-y)/4))),hit=MEL.findIndex(n=>t>=n.s-.15&&t<n.s+Math.max(n.l,.3)&&stepOf(n.m,n.f)===st);
+  if(hit>=0){MEL.splice(hit,1);score();return}
+  const gq=4/+$('#dur').value,a=+$('#acc').value,m=12*(Math.floor(st/7)+5)+NAT[((st%7)+7)%7]+(a===1?1:a===2?-1:0);
+  MEL.push({m,s:Math.floor(t/gq)*gq,l:gq,f:a===2});
+  init();const s=settings();live.gain.value=s.vol;voice(m+s.tr,ctx.currentTime+.01,.4,.6,s.S,false,live);score();
+};
+$('#bpl').onclick=()=>{BARS.push(+$('#tsn').value);score()};
+$('#bmi').onclick=()=>{if(BARS.length>1){BARS.pop();const e=bounds().reduce((a,b)=>a+b.q,0);MEL=MEL.filter(n=>n.s<e);score()}};
+$('#mclr').onclick=()=>{MEL=[];score()};
+$('#bch').onclick=()=>{BARS=parse($('#src').value).filter(i=>i.type!=='say').map(i=>i.beats||+$('#beats').value);if(!BARS.length)BARS=[4];score()};
+$('#bcd').onclick=()=>{
+  const v=$('#src').value;let i=0,o='',p=0;
+  parse(v).forEach(it=>{if(it.type==='say')return;const n=BARS[i++];if(!n)return;
+    const raw=v.slice(it.span[0],it.span[1]).replace(/:\d+(\.\d+)?(?=\[|@|$)/,'').replace(/^[^\[@]*/,a=>a+':'+n);o+=v.slice(p,it.span[0])+raw;p=it.span[1]});
+  $('#src').value=o+v.slice(p);draw();score();
+};
+function setPro(v){PRO=v;$('#scp').hidden=!v;$('#pro').textContent=v?'🔓 プロモード中 (ロックする)':'🔒 プロモード';try{sessionStorage.pro=v?'1':'0'}catch(e){}if(v)score()}
+$('#pro').onclick=()=>{if(PRO)setPro(false);else{$('#pwr').hidden=!$('#pwr').hidden;$('#pw').focus()}};
+const tryPw=()=>{if($('#pw').value===PRO_PW){$('#pw').value='';$('#pwr').hidden=true;fst('');setPro(true)}else fst('パスワードが違います')};
+$('#pwo').onclick=tryPw;$('#pw').onkeydown=e=>{if(e.key==='Enter')tryPw()};
+$('#src').addEventListener('input',score);['#tsn','#tsd','#beats'].forEach(i=>['input','change'].forEach(v=>$(i).addEventListener(v,score)));
+try{if(sessionStorage.pro==='1')setPro(true)}catch(e){}
 
 draw();
 </script>
